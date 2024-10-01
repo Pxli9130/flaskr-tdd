@@ -3,7 +3,7 @@ import pytest, json
 from pathlib import Path
 
 # from project.app import app, init_db, db
-from project.app import app, db
+from project.app import app, db, models
 
 TEST_DB = "test.db"
 
@@ -89,3 +89,28 @@ def test_delete_message(client):
     rv = client.get('/delete/1')
     data = json.loads(rv.data)
     assert data["status"] == 1
+
+def test_search_route(client):
+    login(client, app.config["USERNAME"], app.config["PASSWORD"])
+
+    rv = client.post(
+        "/add",
+        data=dict(title="Test Title", text="Test Content"),
+        follow_redirects=True,
+    )
+    assert b'Test Title' in rv.data
+
+    rv = client.get('/search/')
+    assert rv.status_code == 200
+    assert b'' in rv.data
+    assert b'' in rv.data
+
+    rv = client.get('/search/?query=Test')
+    assert rv.status_code == 200
+    assert b'Test Title' in rv.data
+    assert b'Test Content' in rv.data
+
+    rv = client.get('/search/?query=Nonexistent')
+    assert rv.status_code == 200
+    assert b'Test Title' not in rv.data
+    assert b'Test Content' not in rv.data
