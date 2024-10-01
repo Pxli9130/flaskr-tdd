@@ -86,7 +86,11 @@ def test_messages(client):
 
 def test_delete_message(client):
     """Ensure the messages are being deleted"""
-    rv = client.get('/delete/1')
+    rv = client.get("/delete/1")
+    data = json.loads(rv.data)
+    assert data["status"] == 0
+    login(client, app.config["USERNAME"], app.config["PASSWORD"])
+    rv = client.get("/delete/1")
     data = json.loads(rv.data)
     assert data["status"] == 1
 
@@ -114,3 +118,16 @@ def test_search_route(client):
     assert rv.status_code == 200
     assert b'Test Title' not in rv.data
     assert b'Test Content' not in rv.data
+
+
+
+def test_login_required(client):
+    rv = client.get('/delete/1')
+    assert rv.status_code == 401
+    assert b'Please log in.' in rv.data
+
+    login(client, app.config["USERNAME"], app.config["PASSWORD"])
+    rv = client.get('/delete/1')
+    assert rv.status_code == 200
+    assert b'Post Deleted' in rv.data
+
