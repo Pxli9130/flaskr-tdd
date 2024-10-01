@@ -2,8 +2,6 @@ import os
 from functools import wraps
 from pathlib import Path
 
-
-
 from flask import (
     Flask,
     render_template,
@@ -40,6 +38,7 @@ db = SQLAlchemy(app)
 
 from project import models
 
+
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -49,7 +48,6 @@ def login_required(f):
         return f(*args, **kwargs)
 
     return decorated_function
-
 
 
 @app.route("/")
@@ -69,6 +67,7 @@ def add_entry():
     db.session.commit()
     flash("New entry was successfully posted")
     return redirect(url_for("index"))
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -93,6 +92,7 @@ def logout():
     flash("You were logged out")
     return redirect(url_for("index"))
 
+
 @app.route("/delete/<int:post_id>", methods=["GET"])
 @login_required
 def delete_entry(post_id):
@@ -116,7 +116,6 @@ def search():
     if query:
         return render_template("search.html", entries=entries, query=query)
     return render_template("search.html")
-
 
 
 if __name__ == "__main__":
